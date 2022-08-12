@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="style.css">
+    <link href='https://fonts.googleapis.com/css?family=Alegreya' rel='stylesheet'>
+</head>
+<body>
+    <div class="box">
+        <time id="date"></time>
+        <input type="search" placeholder="Enter a city" id="citySearch">
+        <button onclick="searchWeather()">Submit</button>
+        <img src="icons/unknown.png" id="icon">
+        <div id="weather">-- C</div>
+        <div id="weatherDescription"></div>
+        <div id="city"></div>
+    </div>
+
+</body>
+</html>
+
+<script>
+    n =  new Date();
+    y = n.getFullYear();
+    m = n.getMonth() + 1;
+    d = n.getDate();
+    document.getElementById("date").innerHTML = m + "/" + d + "/" + y;
+
+    let Latitude;
+    let Longitude;
+    let city;
+
+
+    window.onload = (event) => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(storeLocation);
+        } else {
+
+        }
+    };
+
+    function storeLocation(position){
+        Latitude=position.coords.latitude;
+        Longitude=position.coords.longitude;
+        console.log(Longitude);
+        console.log(Latitude)
+        fetch("http://api.openweathermap.org/data/2.5/weather?lat="+Latitude+"&lon="+Longitude+"&appid=4d06ab4aa58138144cb16a77b72a4565")
+            .then(response=>response.json())
+            .then(data=>{
+                document.getElementById("city").innerHTML=data['name'];
+                document.getElementById("weather").innerHTML=(data['main']['temp']-273.15).toFixed(2) +" C";
+                document.getElementById("weatherDescription").innerHTML=data['weather'][0]['description'];
+                document.getElementById("icon").src="/icons/"+data['weather'][0]['icon']+".png"
+            })
+    }
+
+    function searchWeather(){
+        city=document.getElementById("citySearch").value;
+        fetch("http://api.openweathermap.org/data/2.5/weather?q="+city+"&appid=4d06ab4aa58138144cb16a77b72a4565")
+            .then(response=>response.json())
+            .then(data=>{
+                document.getElementById("city").innerHTML=data['name'];
+                document.getElementById("weather").innerHTML=(data['main']['temp']-273.15).toFixed(2) +" C";
+                document.getElementById("weatherDescription").innerHTML=data['weather'][0]['description'];
+                document.getElementById("icon").src="/icons/"+data['weather'][0]['icon']+".png"
+            })
+            .catch(err=> {
+                document.getElementById("city").innerHTML="Wrong city";
+                document.getElementById("weather").innerHTML="-- C";
+                document.getElementById("weatherDescription").innerHTML="";
+                document.getElementById("icon").src="/icons/unknown.png"
+            })
+    }
+
+</script>
